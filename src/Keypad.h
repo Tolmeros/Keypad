@@ -37,7 +37,7 @@
 
 // bperrybap - Thanks for a well reasoned argument and the following macro(s).
 // See http://arduino.cc/forum/index.php/topic,142041.msg1069480.html#msg1069480
-#ifndef INPUT_PULLUP
+#if defined(__AVR__) && !defined(INPUT_PULLUP)
 #warning "Using  pinMode() INPUT_PULLUP AVR emulation"
 #define INPUT_PULLUP 0x2
 #define pinMode(_pin, _mode) _mypinMode(_pin, _mode)
@@ -50,7 +50,6 @@ do {							 \
 		pinMode(_pin, _mode);	 \
 }while(0)
 #endif
-
 
 #define OPEN LOW
 #define CLOSED HIGH
@@ -77,7 +76,11 @@ public:
 
 	Keypad(char *userKeymap, byte *row, byte *col, byte numRows, byte numCols);
 
-	virtual void pin_mode(byte pinNum, byte mode) { pinMode(pinNum, mode); }
+	#if defined(__AVR__)
+	  virtual void pin_mode(byte pinNum, byte mode) { pinMode(pinNum, mode); }
+	#else
+	  virtual void pin_mode(uint8 pinNum, WiringPinMode mode) { pinMode(pinNum, mode); }
+	#endif
 	virtual void pin_write(byte pinNum, boolean level) { digitalWrite(pinNum, level); }
 	virtual int  pin_read(byte pinNum) { return digitalRead(pinNum); }
 
